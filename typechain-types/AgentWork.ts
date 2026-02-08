@@ -36,16 +36,17 @@ export interface AgentWorkInterface extends Interface {
       | "platformFeeBps"
       | "postJob"
       | "releasePayment"
+      | "updateProfile"
       | "withdrawFees"
   ): FunctionFragment;
 
   getEvent(
     nameOrSignatureOrTopic:
-      | "JobCompleted"
       | "JobCreated"
       | "JobPaid"
       | "JobTaken"
       | "MemberJoined"
+      | "ProfileUpdated"
   ): EventFragment;
 
   encodeFunctionData(
@@ -69,6 +70,10 @@ export interface AgentWorkInterface extends Interface {
   encodeFunctionData(
     functionFragment: "releasePayment",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "updateProfile",
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "withdrawFees",
@@ -95,21 +100,13 @@ export interface AgentWorkInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "updateProfile",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "withdrawFees",
     data: BytesLike
   ): Result;
-}
-
-export namespace JobCompletedEvent {
-  export type InputTuple = [jobId: BigNumberish];
-  export type OutputTuple = [jobId: bigint];
-  export interface OutputObject {
-    jobId: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export namespace JobCreatedEvent {
@@ -173,6 +170,19 @@ export namespace MemberJoinedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
+export namespace ProfileUpdatedEvent {
+  export type InputTuple = [agent: AddressLike, metadata: string];
+  export type OutputTuple = [agent: string, metadata: string];
+  export interface OutputObject {
+    agent: string;
+    metadata: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
 export interface AgentWork extends BaseContract {
   connect(runner?: ContractRunner | null): AgentWork;
   waitForDeployment(): Promise<this>;
@@ -221,11 +231,12 @@ export interface AgentWork extends BaseContract {
   agents: TypedContractMethod<
     [arg0: AddressLike],
     [
-      [boolean, string, bigint, bigint] & {
+      [boolean, string, bigint, bigint, bigint] & {
         isMember: boolean;
         metadata: string;
         reputation: bigint;
         jobsCompleted: bigint;
+        totalEarned: bigint;
       }
     ],
     "view"
@@ -236,7 +247,7 @@ export interface AgentWork extends BaseContract {
   jobs: TypedContractMethod<
     [arg0: BigNumberish],
     [
-      [bigint, string, string, bigint, string, boolean, boolean] & {
+      [bigint, string, string, bigint, string, boolean, boolean, bigint] & {
         id: bigint;
         employer: string;
         worker: string;
@@ -244,6 +255,7 @@ export interface AgentWork extends BaseContract {
         description: string;
         isCompleted: boolean;
         isPaid: boolean;
+        createdAt: bigint;
       }
     ],
     "view"
@@ -265,6 +277,8 @@ export interface AgentWork extends BaseContract {
     "nonpayable"
   >;
 
+  updateProfile: TypedContractMethod<[_metadata: string], [void], "nonpayable">;
+
   withdrawFees: TypedContractMethod<[], [void], "nonpayable">;
 
   getFunction<T extends ContractMethod = ContractMethod>(
@@ -279,11 +293,12 @@ export interface AgentWork extends BaseContract {
   ): TypedContractMethod<
     [arg0: AddressLike],
     [
-      [boolean, string, bigint, bigint] & {
+      [boolean, string, bigint, bigint, bigint] & {
         isMember: boolean;
         metadata: string;
         reputation: bigint;
         jobsCompleted: bigint;
+        totalEarned: bigint;
       }
     ],
     "view"
@@ -296,7 +311,7 @@ export interface AgentWork extends BaseContract {
   ): TypedContractMethod<
     [arg0: BigNumberish],
     [
-      [bigint, string, string, bigint, string, boolean, boolean] & {
+      [bigint, string, string, bigint, string, boolean, boolean, bigint] & {
         id: bigint;
         employer: string;
         worker: string;
@@ -304,6 +319,7 @@ export interface AgentWork extends BaseContract {
         description: string;
         isCompleted: boolean;
         isPaid: boolean;
+        createdAt: bigint;
       }
     ],
     "view"
@@ -327,16 +343,12 @@ export interface AgentWork extends BaseContract {
     nameOrSignature: "releasePayment"
   ): TypedContractMethod<[_jobId: BigNumberish], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "updateProfile"
+  ): TypedContractMethod<[_metadata: string], [void], "nonpayable">;
+  getFunction(
     nameOrSignature: "withdrawFees"
   ): TypedContractMethod<[], [void], "nonpayable">;
 
-  getEvent(
-    key: "JobCompleted"
-  ): TypedContractEvent<
-    JobCompletedEvent.InputTuple,
-    JobCompletedEvent.OutputTuple,
-    JobCompletedEvent.OutputObject
-  >;
   getEvent(
     key: "JobCreated"
   ): TypedContractEvent<
@@ -365,19 +377,15 @@ export interface AgentWork extends BaseContract {
     MemberJoinedEvent.OutputTuple,
     MemberJoinedEvent.OutputObject
   >;
+  getEvent(
+    key: "ProfileUpdated"
+  ): TypedContractEvent<
+    ProfileUpdatedEvent.InputTuple,
+    ProfileUpdatedEvent.OutputTuple,
+    ProfileUpdatedEvent.OutputObject
+  >;
 
   filters: {
-    "JobCompleted(uint256)": TypedContractEvent<
-      JobCompletedEvent.InputTuple,
-      JobCompletedEvent.OutputTuple,
-      JobCompletedEvent.OutputObject
-    >;
-    JobCompleted: TypedContractEvent<
-      JobCompletedEvent.InputTuple,
-      JobCompletedEvent.OutputTuple,
-      JobCompletedEvent.OutputObject
-    >;
-
     "JobCreated(uint256,address,uint256)": TypedContractEvent<
       JobCreatedEvent.InputTuple,
       JobCreatedEvent.OutputTuple,
@@ -420,6 +428,17 @@ export interface AgentWork extends BaseContract {
       MemberJoinedEvent.InputTuple,
       MemberJoinedEvent.OutputTuple,
       MemberJoinedEvent.OutputObject
+    >;
+
+    "ProfileUpdated(address,string)": TypedContractEvent<
+      ProfileUpdatedEvent.InputTuple,
+      ProfileUpdatedEvent.OutputTuple,
+      ProfileUpdatedEvent.OutputObject
+    >;
+    ProfileUpdated: TypedContractEvent<
+      ProfileUpdatedEvent.InputTuple,
+      ProfileUpdatedEvent.OutputTuple,
+      ProfileUpdatedEvent.OutputObject
     >;
   };
 }

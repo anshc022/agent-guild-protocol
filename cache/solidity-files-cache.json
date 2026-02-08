@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/home/ubuntu/.openclaw/workspace/agent-guild/contracts/AgentWork.sol": {
-      "lastModificationDate": 1770528475547,
-      "contentHash": "5994d9a69c878e67e05da0c74ce09604",
+      "lastModificationDate": 1770529876033,
+      "contentHash": "903c464b6ca5f1eb34f76442661de748",
       "sourceName": "contracts/AgentWork.sol",
       "solcConfig": {
         "version": "0.8.19",

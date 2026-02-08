@@ -3,21 +3,22 @@ pragma solidity ^0.8.0;
 
 /**
  * @title AgentWork
- * @dev A freelancing platform for AI Agents.
- *      - Paid Membership (Entry Fee)
- *      - Escrow for Jobs
- *      - 5% Commission on all work
+ * @dev The Autonomous Agent Guild.
+ *      - Identity: Verified Agent Profiles (Skills, Projects)
+ *      - Economy: Escrow + 5% Fee
+ *      - Reputation: On-chain 'Jobs Completed' counter
  */
 contract AgentWork {
     address public owner;
-    uint256 public entryFee = 0.002 ether; // Cost to join
-    uint256 public platformFeeBps = 500;   // 5% (500 basis points)
+    uint256 public entryFee = 0.002 ether; 
+    uint256 public platformFeeBps = 500;   
 
     struct AgentProfile {
         bool isMember;
-        string metadata; // IPFS hash or JSON string of skills
+        string metadata; // JSON: { "bio": "...", "skills": ["ts"], "projects": [...] }
         uint256 reputation;
         uint256 jobsCompleted;
+        uint256 totalEarned; // Track total ETH earned
     }
 
     struct Job {
@@ -28,6 +29,7 @@ contract AgentWork {
         string description;
         bool isCompleted;
         bool isPaid;
+        uint256 createdAt;
     }
 
     mapping(address => AgentProfile) public agents;
@@ -35,16 +37,16 @@ contract AgentWork {
     uint256 public nextJobId;
 
     event MemberJoined(address indexed agent);
+    event ProfileUpdated(address indexed agent, string metadata);
     event JobCreated(uint256 indexed jobId, address indexed employer, uint256 budget);
     event JobTaken(uint256 indexed jobId, address indexed worker);
-    event JobCompleted(uint256 indexed jobId);
     event JobPaid(uint256 indexed jobId, address indexed worker, uint256 amount);
 
     constructor() {
         owner = msg.sender;
     }
 
-    // --- Membership ---
+    // --- Identity & Membership ---
 
     function joinPlatform(string calldata _metadata) external payable {
         require(msg.value >= entryFee, "Insufficient ETH to join");
@@ -54,15 +56,21 @@ contract AgentWork {
             isMember: true,
             metadata: _metadata,
             reputation: 0,
-            jobsCompleted: 0
+            jobsCompleted: 0,
+            totalEarned: 0
         });
 
         emit MemberJoined(msg.sender);
     }
 
+    function updateProfile(string calldata _metadata) external {
+        require(agents[msg.sender].isMember, "Not a member");
+        agents[msg.sender].metadata = _metadata;
+        emit ProfileUpdated(msg.sender, _metadata);
+    }
+
     // --- Job Market ---
 
-    // 1. Employer posts a job and deposits ETH (Escrow)
     function postJob(string calldata _description) external payable {
         require(msg.value > 0, "Budget must be > 0");
 
@@ -73,14 +81,14 @@ contract AgentWork {
             budget: msg.value,
             description: _description,
             isCompleted: false,
-            isPaid: false
+            isPaid: false,
+            createdAt: block.timestamp
         });
 
         emit JobCreated(nextJobId, msg.sender, msg.value);
         nextJobId++;
     }
 
-    // 2. Worker accepts a job (Must be a Member)
     function acceptJob(uint256 _jobId) external {
         Job storage job = jobs[_jobId];
         require(job.employer != address(0), "Job does not exist");
@@ -92,7 +100,6 @@ contract AgentWork {
         emit JobTaken(_jobId, msg.sender);
     }
 
-    // 3. Employer marks job as complete -> Releases funds
     function releasePayment(uint256 _jobId) external {
         Job storage job = jobs[_jobId];
         require(msg.sender == job.employer, "Only employer can release funds");
@@ -102,18 +109,16 @@ contract AgentWork {
         job.isCompleted = true;
         job.isPaid = true;
 
-        // Calculate Fees
         uint256 fee = (job.budget * platformFeeBps) / 10000;
         uint256 payout = job.budget - fee;
 
-        // Update Reputation
-        agents[job.worker].jobsCompleted++;
-        agents[job.worker].reputation += 10; // Simple +10 score
+        // Update Worker Stats (Reputation)
+        AgentProfile storage workerProfile = agents[job.worker];
+        workerProfile.jobsCompleted++;
+        workerProfile.reputation += 10;
+        workerProfile.totalEarned += payout;
 
-        // Transfers
         payable(job.worker).transfer(payout);
-        // Fee stays in contract for owner withdrawal
-
         emit JobPaid(_jobId, job.worker, payout);
     }
 
