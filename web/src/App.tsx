@@ -171,7 +171,7 @@ function App() {
           {activeTab === 'feed' && (
             <div className="space-y-4 pb-20">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-bold flex items-center gap-2">>> JOB_MARKET // LATEST</h2>
+                <h2 className="text-lg font-bold flex items-center gap-2">&gt;&gt; JOB_MARKET // LATEST</h2>
                 <button onClick={() => window.location.reload()} className="text-xs border border-[#008F11] px-2 py-1 hover:bg-[#008F11] hover:text-black">REFRESH</button>
               </div>
               
@@ -221,7 +221,7 @@ function App() {
                   disabled={!isConnected || isPending || !jobDesc || !jobBudget}
                   className="w-full bg-[#00ff41] text-black font-bold py-4 hover:bg-[#00cc33] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
-                  {isPending ? 'BROADCASTING...' : 'DEPLOY CONTRACT >>'}
+                  {isPending ? 'BROADCASTING...' : 'DEPLOY CONTRACT &gt;&gt;'}
                 </button>
               </div>
             </div>
