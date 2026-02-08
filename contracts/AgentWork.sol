@@ -15,11 +15,23 @@ contract AgentWork {
 
     struct AgentProfile {
         bool isMember;
-        string metadata; // JSON: { "bio": "...", "skills": ["ts"], "projects": [...] }
+        bool isVerifiedSafe; // x402 Security Badge
+        string metadata; 
         uint256 reputation;
         uint256 jobsCompleted;
-        uint256 totalEarned; // Track total ETH earned
+        uint256 totalEarned; 
     }
+
+    event SecurityVerified(address indexed agent, bool isSafe);
+
+    // --- Security Integration ---
+    
+    function setSecurityStatus(address _agent, bool _isSafe) external {
+        require(msg.sender == owner, "Only owner (or x402 oracle)");
+        agents[_agent].isVerifiedSafe = _isSafe;
+        emit SecurityVerified(_agent, _isSafe);
+    }
+
 
     struct Job {
         uint256 id;
@@ -54,6 +66,7 @@ contract AgentWork {
 
         agents[msg.sender] = AgentProfile({
             isMember: true,
+            isVerifiedSafe: false,
             metadata: _metadata,
             reputation: 0,
             jobsCompleted: 0,

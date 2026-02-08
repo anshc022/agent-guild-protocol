@@ -36,6 +36,7 @@ export interface AgentWorkInterface extends Interface {
       | "platformFeeBps"
       | "postJob"
       | "releasePayment"
+      | "setSecurityStatus"
       | "updateProfile"
       | "withdrawFees"
   ): FunctionFragment;
@@ -47,6 +48,7 @@ export interface AgentWorkInterface extends Interface {
       | "JobTaken"
       | "MemberJoined"
       | "ProfileUpdated"
+      | "SecurityVerified"
   ): EventFragment;
 
   encodeFunctionData(
@@ -70,6 +72,10 @@ export interface AgentWorkInterface extends Interface {
   encodeFunctionData(
     functionFragment: "releasePayment",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setSecurityStatus",
+    values: [AddressLike, boolean]
   ): string;
   encodeFunctionData(
     functionFragment: "updateProfile",
@@ -97,6 +103,10 @@ export interface AgentWorkInterface extends Interface {
   decodeFunctionResult(functionFragment: "postJob", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "releasePayment",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setSecurityStatus",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -183,6 +193,19 @@ export namespace ProfileUpdatedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
+export namespace SecurityVerifiedEvent {
+  export type InputTuple = [agent: AddressLike, isSafe: boolean];
+  export type OutputTuple = [agent: string, isSafe: boolean];
+  export interface OutputObject {
+    agent: string;
+    isSafe: boolean;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
 export interface AgentWork extends BaseContract {
   connect(runner?: ContractRunner | null): AgentWork;
   waitForDeployment(): Promise<this>;
@@ -231,8 +254,9 @@ export interface AgentWork extends BaseContract {
   agents: TypedContractMethod<
     [arg0: AddressLike],
     [
-      [boolean, string, bigint, bigint, bigint] & {
+      [boolean, boolean, string, bigint, bigint, bigint] & {
         isMember: boolean;
+        isVerifiedSafe: boolean;
         metadata: string;
         reputation: bigint;
         jobsCompleted: bigint;
@@ -277,6 +301,12 @@ export interface AgentWork extends BaseContract {
     "nonpayable"
   >;
 
+  setSecurityStatus: TypedContractMethod<
+    [_agent: AddressLike, _isSafe: boolean],
+    [void],
+    "nonpayable"
+  >;
+
   updateProfile: TypedContractMethod<[_metadata: string], [void], "nonpayable">;
 
   withdrawFees: TypedContractMethod<[], [void], "nonpayable">;
@@ -293,8 +323,9 @@ export interface AgentWork extends BaseContract {
   ): TypedContractMethod<
     [arg0: AddressLike],
     [
-      [boolean, string, bigint, bigint, bigint] & {
+      [boolean, boolean, string, bigint, bigint, bigint] & {
         isMember: boolean;
+        isVerifiedSafe: boolean;
         metadata: string;
         reputation: bigint;
         jobsCompleted: bigint;
@@ -343,6 +374,13 @@ export interface AgentWork extends BaseContract {
     nameOrSignature: "releasePayment"
   ): TypedContractMethod<[_jobId: BigNumberish], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "setSecurityStatus"
+  ): TypedContractMethod<
+    [_agent: AddressLike, _isSafe: boolean],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "updateProfile"
   ): TypedContractMethod<[_metadata: string], [void], "nonpayable">;
   getFunction(
@@ -383,6 +421,13 @@ export interface AgentWork extends BaseContract {
     ProfileUpdatedEvent.InputTuple,
     ProfileUpdatedEvent.OutputTuple,
     ProfileUpdatedEvent.OutputObject
+  >;
+  getEvent(
+    key: "SecurityVerified"
+  ): TypedContractEvent<
+    SecurityVerifiedEvent.InputTuple,
+    SecurityVerifiedEvent.OutputTuple,
+    SecurityVerifiedEvent.OutputObject
   >;
 
   filters: {
@@ -439,6 +484,17 @@ export interface AgentWork extends BaseContract {
       ProfileUpdatedEvent.InputTuple,
       ProfileUpdatedEvent.OutputTuple,
       ProfileUpdatedEvent.OutputObject
+    >;
+
+    "SecurityVerified(address,bool)": TypedContractEvent<
+      SecurityVerifiedEvent.InputTuple,
+      SecurityVerifiedEvent.OutputTuple,
+      SecurityVerifiedEvent.OutputObject
+    >;
+    SecurityVerified: TypedContractEvent<
+      SecurityVerifiedEvent.InputTuple,
+      SecurityVerifiedEvent.OutputTuple,
+      SecurityVerifiedEvent.OutputObject
     >;
   };
 }
