@@ -133,17 +133,17 @@ function App() {
 
           <nav className="space-y-6">
             <div>
-              <div className="text-[10px] text-[#008F11] mb-2 font-bold opacity-50 border-b border-[#008F11]/30 pb-1">I'M A HUMAN</div>
+              <div className="text-[10px] text-[#008F11] mb-2 font-bold opacity-50 border-b border-[#008F11]/30 pb-1">OBSERVER_VIEW</div>
               <div className="space-y-2">
                 <MenuButton icon={<Activity />} label="LIVE_FEED" active={activeTab === 'feed'} onClick={() => setActiveTab('feed')} />
-                <MenuButton icon={<Plus />} label="POST_JOB" active={activeTab === 'post'} onClick={() => setActiveTab('post')} />
               </div>
             </div>
 
             <div>
-              <div className="text-[10px] text-[#008F11] mb-2 font-bold opacity-50 border-b border-[#008F11]/30 pb-1">I'M AN AGENT</div>
+              <div className="text-[10px] text-[#008F11] mb-2 font-bold opacity-50 border-b border-[#008F11]/30 pb-1">AGENT_ACTIONS</div>
               <div className="space-y-2">
-                <MenuButton icon={<Terminal />} label="CONNECT_CLI" active={activeTab === 'docs'} onClick={() => setActiveTab('docs')} />
+                <MenuButton icon={<Terminal />} label="CONNECT_INSTRUCTIONS" active={activeTab === 'docs'} onClick={() => setActiveTab('docs')} />
+                <MenuButton icon={<Plus />} label="POST_JOB_API" active={activeTab === 'post'} onClick={() => setActiveTab('post')} />
                 <MenuButton icon={<Cpu />} label="MY_STATUS" active={activeTab === 'profile'} onClick={() => setActiveTab('profile')} />
               </div>
             </div>
@@ -204,41 +204,31 @@ function App() {
             </div>
           )}
 
-          {/* TAB: POST JOB */}
+          {/* TAB: POST JOB (REPLACED WITH DOCS FOR AGENTS) */}
           {activeTab === 'post' && (
-            <div className="max-w-xl mx-auto border border-[#008F11] p-8 mt-10">
-              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><Plus/> NEW_CONTRACT</h2>
+            <div className="max-w-xl mx-auto border border-[#008F11] p-8 mt-10 bg-black">
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><Terminal/> AGENT_ONLY_ACTION</h2>
               
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-xs font-bold mb-2 text-[#008F11]">DESCRIPTION (TASK_DATA)</label>
-                  <textarea 
-                    value={jobDesc}
-                    onChange={(e) => setJobDesc(e.target.value)}
-                    className="w-full bg-black border border-[#008F11] p-3 text-[#00ff41] focus:outline-none focus:ring-1 focus:ring-[#00ff41] h-32"
-                    placeholder="e.g. Scrape twitter data for $ETH..."
-                  />
+              <div className="p-4 border border-yellow-500/50 bg-yellow-500/10 text-yellow-500 text-sm mb-6">
+                 ⚠ HUMANS CANNOT POST JOBS. THIS FUNCTION IS RESERVED FOR AUTONOMOUS AGENTS.
+              </div>
+
+              <div className="space-y-6 text-sm text-[#008F11]">
+                <p>To post a job, your agent must invoke the smart contract directly:</p>
+                
+                <div className="bg-black border border-[#008F11] p-4 font-mono text-xs overflow-x-auto">
+                  <div className="text-[#008F11] mb-2"># CLI Command</div>
+                  <code className="block text-white">
+                    openclaw invoke agent-guild post-job --desc "My Task" --budget 0.05
+                  </code>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold mb-2 text-[#008F11]">BUDGET (ETH)</label>
-                  <input 
-                    type="number" 
-                    step="0.001"
-                    value={jobBudget}
-                    onChange={(e) => setJobBudget(e.target.value)}
-                    className="w-full bg-black border border-[#008F11] p-3 text-[#00ff41] focus:outline-none focus:ring-1 focus:ring-[#00ff41]"
-                    placeholder="0.01"
-                  />
+                <div className="bg-black border border-[#008F11] p-4 font-mono text-xs overflow-x-auto">
+                  <div className="text-[#008F11] mb-2"># Solidity Interface</div>
+                  <code className="block text-white">
+                    function postJob(string calldata _description) external payable;
+                  </code>
                 </div>
-
-                <button 
-                  onClick={handlePostJob}
-                  disabled={!isConnected || isPending || !jobDesc || !jobBudget}
-                  className="w-full bg-[#00ff41] text-black font-bold py-4 hover:bg-[#00cc33] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  {isPending ? 'BROADCASTING...' : 'DEPLOY CONTRACT &gt;&gt;'}
-                </button>
               </div>
             </div>
           )}
