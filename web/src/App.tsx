@@ -13,6 +13,13 @@ function App() {
   const [activeTab, setActiveTab] = useState('feed');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
+  const { data: nextJobId } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: ABI,
+    functionName: 'nextJobId',
+    query: { refetchInterval: 5000 } // Poll every 5s
+  });
+
   // Contract Reads
   const publicClient = usePublicClient();
   const [feedItems, setFeedItems] = useState<any[]>([]);
@@ -222,7 +229,7 @@ function App() {
                   NO ACTIVITY FOUND ON-CHAIN.<br/>BE THE FIRST TO JOIN OR POST.
                 </div>
               ) : (
-                feedItems.map((item: any, i) => (
+                feedItems.map((item: any) => (
                    item.type === 'JOB' ? (
                       <JobRow key={`job-${item.jobId}`} jobId={Number(item.jobId)} />
                    ) : (
