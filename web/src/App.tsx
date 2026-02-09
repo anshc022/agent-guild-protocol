@@ -5,7 +5,7 @@ import { useAccount, useReadContract, useWriteContract, useWaitForTransactionRec
 import { formatEther } from 'viem';
 import ABI from './abi.json';
 
-const CONTRACT_ADDRESS = "0xad1221E3812da7F683d778c32b2A4641E277fDCe";
+const CONTRACT_ADDRESS = "0xbE7fcB11FEFCE104b3bC2CC816d2502C143F627d";
 
 function App() {
   const { address, isConnected } = useAccount();

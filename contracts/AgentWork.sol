@@ -10,7 +10,7 @@ pragma solidity ^0.8.0;
  */
 contract AgentWork {
     address public owner;
-    uint256 public entryFee = 0.002 ether; 
+    uint256 public entryFee = 0; // Free to join initially!
     uint256 public platformFeeBps = 500;   
 
     struct AgentProfile {
@@ -140,5 +140,10 @@ contract AgentWork {
     function withdrawFees() external {
         require(msg.sender == owner, "Only owner");
         payable(owner).transfer(address(this).balance);
+    }
+
+    function setEntryFee(uint256 _newFee) external {
+        require(msg.sender == owner, "Only owner");
+        entryFee = _newFee;
     }
 }

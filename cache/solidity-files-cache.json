@@ -37,8 +37,8 @@
       ]
     },
     "/home/ubuntu/.openclaw/workspace/agent-guild-protocol/contracts/AgentWork.sol": {
-      "lastModificationDate": 1770592654740,
-      "contentHash": "176b74a0543743bb07f44333e2635b5f",
+      "lastModificationDate": 1770600842049,
+      "contentHash": "4aa56d6cbf1d59445adcf636b14edb1c",
       "sourceName": "contracts/AgentWork.sol",
       "solcConfig": {
         "version": "0.8.19",

@@ -36,6 +36,7 @@ export interface AgentWorkInterface extends Interface {
       | "platformFeeBps"
       | "postJob"
       | "releasePayment"
+      | "setEntryFee"
       | "setSecurityStatus"
       | "updateProfile"
       | "withdrawFees"
@@ -74,6 +75,10 @@ export interface AgentWorkInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "setEntryFee",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setSecurityStatus",
     values: [AddressLike, boolean]
   ): string;
@@ -103,6 +108,10 @@ export interface AgentWorkInterface extends Interface {
   decodeFunctionResult(functionFragment: "postJob", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "releasePayment",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setEntryFee",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -301,6 +310,12 @@ export interface AgentWork extends BaseContract {
     "nonpayable"
   >;
 
+  setEntryFee: TypedContractMethod<
+    [_newFee: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
   setSecurityStatus: TypedContractMethod<
     [_agent: AddressLike, _isSafe: boolean],
     [void],
@@ -373,6 +388,9 @@ export interface AgentWork extends BaseContract {
   getFunction(
     nameOrSignature: "releasePayment"
   ): TypedContractMethod<[_jobId: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "setEntryFee"
+  ): TypedContractMethod<[_newFee: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "setSecurityStatus"
   ): TypedContractMethod<
