@@ -1,8 +1,8 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Terminal, Shield, Cpu, Activity, Plus, Check, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { formatEther } from 'viem';
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, usePublicClient } from 'wagmi';
+import { formatEther, parseAbiItem } from 'viem';
 import ABI from './abi.json';
 
 const CONTRACT_ADDRESS = "0xbE7fcB11FEFCE104b3bC2CC816d2502C143F627d";
@@ -14,12 +14,41 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Contract Reads
-  const { data: nextJobId } = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi: ABI,
-    functionName: 'nextJobId',
-    query: { refetchInterval: 5000 } // Poll every 5s
-  });
+  const publicClient = usePublicClient();
+  const [feedItems, setFeedItems] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!publicClient) return;
+    
+    const fetchFeed = async () => {
+      // 1. Get JobCreated Events
+      const jobLogs = await publicClient.getLogs({
+        address: CONTRACT_ADDRESS,
+        event: parseAbiItem('event JobCreated(uint256 indexed jobId, address indexed employer, uint256 budget)'),
+        fromBlock: 'earliest'
+      });
+
+      // 2. Get MemberJoined Events
+      const memberLogs = await publicClient.getLogs({
+        address: CONTRACT_ADDRESS,
+        event: parseAbiItem('event MemberJoined(address indexed agent)'),
+        fromBlock: 'earliest'
+      });
+
+      // 3. Get blocks for timestamps (optimization: just use log index for simple sort if eager)
+      // For speed, we'll map to a unified structure
+      const jobs = jobLogs.map(log => ({ type: 'JOB', blockNumber: log.blockNumber, ...log.args }));
+      const members = memberLogs.map(log => ({ type: 'AGENT', blockNumber: log.blockNumber, ...log.args }));
+
+      // 4. Merge & Sort (Newest first)
+      const merged = [...jobs, ...members].sort((a, b) => Number(b.blockNumber) - Number(a.blockNumber));
+      setFeedItems(merged);
+    };
+
+    fetchFeed();
+    const interval = setInterval(fetchFeed, 10000);
+    return () => clearInterval(interval);
+  }, [publicClient]);
 
   const { data: agentProfile, refetch: refetchProfile } = useReadContract({
     address: CONTRACT_ADDRESS,
@@ -188,14 +217,17 @@ function App() {
                 <button onClick={() => window.location.reload()} className="text-xs border border-[#008F11] px-2 py-1 hover:bg-[#008F11] hover:text-black">REFRESH</button>
               </div>
               
-              {jobCount === 0 ? (
+              {feedItems.length === 0 ? (
                 <div className="text-center text-[#008F11] py-20 border border-[#008F11] border-dashed">
-                  NO JOBS FOUND ON-CHAIN.<br/>BE THE FIRST TO POST ONE.
+                  NO ACTIVITY FOUND ON-CHAIN.<br/>BE THE FIRST TO JOIN OR POST.
                 </div>
               ) : (
-                // Reverse loop to show newest first. Limiting to last 10 for demo performance.
-                Array.from({ length: Math.min(jobCount, 10) }).map((_, i) => (
-                  <JobRow key={jobCount - 1 - i} jobId={jobCount - 1 - i} />
+                feedItems.map((item: any, i) => (
+                   item.type === 'JOB' ? (
+                      <JobRow key={`job-${item.jobId}`} jobId={Number(item.jobId)} />
+                   ) : (
+                      <AgentRow key={`agent-${item.agent}`} address={item.agent} />
+                   )
                 ))
               )}
             </div>
@@ -333,6 +365,37 @@ function App() {
   );
 }
 
+function AgentRow({ address }: { address: string }) {
+    const { data: profile } = useReadContract({
+      address: CONTRACT_ADDRESS,
+      abi: ABI,
+      functionName: 'agents',
+      args: [address]
+    });
+  
+    const meta = (profile as any)?.[2] ? JSON.parse((profile as any)[2] || '{}') : {};
+  
+    return (
+      <div className="border border-[#ffaa00] p-4 mb-4 bg-[#ffaa00]/5 relative animate-in fade-in slide-in-from-bottom-2">
+         <div className="absolute top-0 right-0 bg-[#ffaa00] text-black text-[10px] px-2 py-0.5 font-bold">
+            NEW_AGENT_JOINED
+         </div>
+         <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-[#ffaa00] text-black flex items-center justify-center font-bold rounded-full">
+                {address.slice(2,4).toUpperCase()}
+            </div>
+            <div>
+                <div className="font-bold text-[#ffaa00]">{meta.name || 'ANONYMOUS_AGENT'}</div>
+                <div className="text-xs text-[#ffaa00]/70 font-mono">{meta.role || 'WORKER'}</div>
+            </div>
+         </div>
+         <div className="mt-2 text-xs font-mono text-[#ffaa00]">
+            ID: {address.slice(0,6)}...{address.slice(-4)}
+         </div>
+      </div>
+    );
+  }
+  
 // Component to fetch and display individual job data
 function JobRow({ jobId }: { jobId: number }) {
   const { data: job } = useReadContract({
