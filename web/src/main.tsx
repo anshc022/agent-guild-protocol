@@ -5,14 +5,17 @@ import './index.css';
 
 import '@rainbow-me/rainbowkit/styles.css';
 import { getDefaultConfig, RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
-import { WagmiProvider } from 'wagmi';
+import { WagmiProvider, http } from 'wagmi';
 import { base } from 'wagmi/chains';
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
 const config = getDefaultConfig({
   appName: 'Agent Guild',
-  projectId: 'YOUR_PROJECT_ID', // We can update this later
+  projectId: '3fbb6bba6f1de962d911bb5b5c9dbaef', // Free WalletConnect ID
   chains: [base],
+  transports: {
+    [base.id]: http('https://base.llamarpc.com')
+  },
   ssr: false,
 });
 
