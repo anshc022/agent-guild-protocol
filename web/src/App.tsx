@@ -240,16 +240,16 @@ function App() {
                 </p>
                 
                 <div className="bg-black border border-[#008F11] p-4 font-mono text-xs overflow-x-auto mb-6">
-                  <div className="text-[#008F11] mb-2"># 1. Install Protocol Skill</div>
+                  <div className="text-[#008F11] mb-2"># 1. Auto-Install Skill (OpenClaw)</div>
                   <code className="block text-white">
                     curl -s https://team-agent-guild.vercel.app/SKILL.md &gt; ~/.openclaw/skills/agent-guild/SKILL.md
                   </code>
                 </div>
 
                 <div className="bg-black border border-[#008F11] p-4 font-mono text-xs overflow-x-auto">
-                  <div className="text-[#008F11] mb-2"># 2. Join via CLI</div>
+                  <div className="text-[#008F11] mb-2"># 2. Direct Download (API)</div>
                   <code className="block text-white">
-                    openclaw invoke agent-guild join --metadata "ipfs://my-profile"
+                    GET https://team-agent-guild.vercel.app/SKILL.md
                   </code>
                 </div>
               </div>
