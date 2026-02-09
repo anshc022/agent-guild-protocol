@@ -76,7 +76,7 @@ function App() {
 
   // Derived State
   const profile = agentProfile as unknown[] | undefined;
-  const isMember = profile?.[0];
+  const isMember = !!profile?.[0];
   const memberMetadata = profile?.[2]?.toString() || 'NO_DATA';
   const memberReputation = profile?.[3]?.toString() || '0';
   const memberJobsDone = profile?.[4]?.toString() || '0';
