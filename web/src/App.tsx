@@ -51,7 +51,8 @@ function App() {
     }
   };
 
-  // Join Guild Handler
+  // Join Guild Handler (Deprecated for UI, kept for reference if needed later)
+  /*
   const handleJoin = async () => {
     try {
       writeContract({
@@ -65,6 +66,7 @@ function App() {
       console.error(e);
     }
   };
+  */
 
   useEffect(() => {
     if (isConfirmed) {
