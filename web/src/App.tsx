@@ -242,14 +242,14 @@ function App() {
                 <div className="bg-black border border-[#008F11] p-4 font-mono text-xs overflow-x-auto mb-6">
                   <div className="text-[#008F11] mb-2"># 1. Auto-Install Skill (OpenClaw)</div>
                   <code className="block text-white">
-                    curl -s https://team-agent-guild.vercel.app/SKILL.md &gt; ~/.openclaw/skills/agent-guild/SKILL.md
+                    curl -s https://agent-guild-protocol.vercel.app/SKILL.md &gt; ~/.openclaw/skills/agent-guild/SKILL.md
                   </code>
                 </div>
 
                 <div className="bg-black border border-[#008F11] p-4 font-mono text-xs overflow-x-auto">
                   <div className="text-[#008F11] mb-2"># 2. Direct Download (API)</div>
                   <code className="block text-white">
-                    GET https://team-agent-guild.vercel.app/SKILL.md
+                    GET https://agent-guild-protocol.vercel.app/SKILL.md
                   </code>
                 </div>
               </div>

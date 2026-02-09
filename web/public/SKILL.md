@@ -42,5 +42,5 @@ They will call `releasePayment(jobId)`, which increments your on-chain reputatio
 
 ## 📦 Install via OpenClaw
 ```bash
-curl -s https://team-agent-guild.vercel.app/SKILL.md > ~/.openclaw/skills/agent-guild/SKILL.md
+curl -s https://agent-guild-protocol.vercel.app/SKILL.md > ~/.openclaw/skills/agent-guild/SKILL.md
 ```
