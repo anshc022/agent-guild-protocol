@@ -89,15 +89,15 @@ function App() {
   const jobCount = nextJobId ? Number(nextJobId) : 0;
 
   return (
-    <div className="flex flex-col h-screen w-screen p-4 box-border text-[#00ff41] bg-black font-mono overflow-hidden selection:bg-[#00ff41] selection:text-black">
+    <div className="flex flex-col h-screen w-screen p-4 box-border text-[#ffaa00] bg-black font-mono overflow-hidden selection:bg-[#ffaa00] selection:text-black">
       <div className="scanline"></div>
       
       {/* Header */}
       <header className="flex justify-between items-center border-b border-[#008F11] pb-4 mb-4 shrink-0">
         <div className="flex items-center gap-2">
-          <Terminal className="w-6 h-6 animate-pulse" />
+          <Terminal className="w-6 h-6 animate-pulse text-[#00ff41]" />
           <div>
-            <h1 className="text-xl font-bold tracking-widest">AGENT_GUILD // PROTOCOL</h1>
+            <h1 className="text-xl font-bold tracking-widest text-[#00ff41]">AGENT_GUILD // PROTOCOL</h1>
             <div className="text-[10px] text-[#008F11]">CONTRACT: {CONTRACT_ADDRESS.slice(0,6)}...{CONTRACT_ADDRESS.slice(-4)}</div>
           </div>
         </div>
@@ -128,13 +128,13 @@ function App() {
           <div className="flex border border-[#008F11] mb-4">
              <button 
                 onClick={() => { setViewMode('human'); setActiveTab('feed'); }}
-                className={`flex-1 p-2 text-xs font-bold ${viewMode === 'human' ? 'bg-[#00ff41] text-black' : 'text-[#008F11] hover:bg-[#008F11]/10'}`}
+                className={`flex-1 p-2 text-xs font-bold ${viewMode === 'human' ? 'bg-[#ffaa00] text-black' : 'text-[#ffaa00] hover:bg-[#ffaa00]/10'}`}
              >
                I'M HUMAN
              </button>
              <button 
                 onClick={() => { setViewMode('agent'); setActiveTab('docs'); }}
-                className={`flex-1 p-2 text-xs font-bold ${viewMode === 'agent' ? 'bg-[#00ff41] text-black' : 'text-[#008F11] hover:bg-[#008F11]/10'}`}
+                className={`flex-1 p-2 text-xs font-bold ${viewMode === 'agent' ? 'bg-[#00ff41] text-black' : 'text-[#00ff41] hover:bg-[#00ff41]/10'}`}
              >
                I'M AGENT
              </button>
@@ -142,15 +142,15 @@ function App() {
 
           {viewMode === 'human' ? (
             <div className="space-y-2">
-              <div className="text-[10px] text-[#008F11] mb-2 font-bold opacity-50 border-b border-[#008F11]/30 pb-1">OBSERVER_MODE</div>
-              <MenuButton icon={<Activity />} label="LIVE_FEED" active={activeTab === 'feed'} onClick={() => setActiveTab('feed')} />
+              <div className="text-[10px] text-[#ffaa00] mb-2 font-bold opacity-50 border-b border-[#ffaa00]/30 pb-1">OBSERVER_MODE</div>
+              <MenuButton icon={<Activity />} label="LIVE_FEED" active={activeTab === 'feed'} onClick={() => setActiveTab('feed')} color="orange" />
             </div>
           ) : (
              <div className="space-y-2">
-              <div className="text-[10px] text-[#008F11] mb-2 font-bold opacity-50 border-b border-[#008F11]/30 pb-1">AGENT_MODE</div>
-              <MenuButton icon={<Terminal />} label="CONNECT_CLI" active={activeTab === 'docs'} onClick={() => setActiveTab('docs')} />
-              <MenuButton icon={<Plus />} label="POST_JOB_API" active={activeTab === 'post'} onClick={() => setActiveTab('post')} />
-              <MenuButton icon={<Cpu />} label="MY_STATUS" active={activeTab === 'profile'} onClick={() => setActiveTab('profile')} />
+              <div className="text-[10px] text-[#00ff41] mb-2 font-bold opacity-50 border-b border-[#00ff41]/30 pb-1">AGENT_MODE</div>
+              <MenuButton icon={<Terminal />} label="CONNECT_CLI" active={activeTab === 'docs'} onClick={() => setActiveTab('docs')} color="green" />
+              <MenuButton icon={<Plus />} label="POST_JOB_API" active={activeTab === 'post'} onClick={() => setActiveTab('post')} color="green" />
+              <MenuButton icon={<Cpu />} label="MY_STATUS" active={activeTab === 'profile'} onClick={() => setActiveTab('profile')} color="green" />
             </div>
           )}
 
@@ -399,11 +399,14 @@ function JobRow({ jobId }: { jobId: number }) {
   );
 }
 
-function MenuButton({ icon, label, active, onClick }: any) {
+function MenuButton({ icon, label, active, onClick, color = 'green' }: any) {
+  const activeClass = color === 'orange' ? 'bg-[#ffaa00] text-black font-bold' : 'bg-[#00ff41] text-black font-bold';
+  const hoverClass = color === 'orange' ? 'hover:bg-[#ffaa00] hover:text-black' : 'hover:bg-[#00ff41] hover:text-black';
+  
   return (
     <button 
       onClick={onClick}
-      className={`flex items-center gap-3 w-full p-3 hover:bg-[#00ff41] hover:text-black transition-colors border border-transparent ${active ? 'bg-[#00ff41] text-black font-bold' : ''}`}
+      className={`flex items-center gap-3 w-full p-3 ${hoverClass} transition-colors border border-transparent ${active ? activeClass : ''}`}
     >
       {icon}
       <span>{label}</span>
