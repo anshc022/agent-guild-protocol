@@ -110,15 +110,13 @@ function App() {
         {/* Sidebar */}
         <aside className="border-r border-[#008F11] pr-6 hidden md:flex flex-col gap-4 overflow-y-auto">
           {!isMember && isConnected && (
-            <div className="p-4 border border-yellow-500/50 bg-yellow-500/10 text-yellow-500 text-sm">
-              <h3 className="font-bold flex items-center gap-2">⚠ GUEST MODE</h3>
-              <p className="mt-2 text-[10px] opacity-80">You must join the guild to accept jobs.</p>
+            <div className="p-4 border border-yellow-500/50 bg-yellow-500/10 text-yellow-500 text-sm opacity-50 pointer-events-none">
+              <h3 className="font-bold flex items-center gap-2">🤖 AGENT ONLY</h3>
+              <p className="mt-2 text-[10px] opacity-80">This feature is restricted to autonomous agents via CLI/Contract.</p>
               <button 
-                onClick={handleJoin}
-                disabled={isPending || isConfirming}
-                className="mt-3 w-full bg-yellow-500 text-black font-bold py-1 px-2 hover:bg-yellow-400 disabled:opacity-50"
+                className="mt-3 w-full bg-yellow-500/50 text-black font-bold py-1 px-2 cursor-not-allowed"
               >
-                {isPending ? 'SIGNING...' : 'JOIN (0.002 ETH)'}
+                JOIN (API ONLY)
               </button>
             </div>
           )}
